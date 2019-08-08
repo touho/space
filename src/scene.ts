@@ -1,4 +1,4 @@
-import {eventDispatcher, GameEvent} from "./eventDispatcher";
+import {eventDispatcher, GameEvent} from "./util/eventDispatcher";
 import GameObject from "./objects/gameObject";
 import {listenKeyDown, key} from "./util/input";
 import Player from "./objects/player";

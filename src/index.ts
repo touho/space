@@ -1,4 +1,4 @@
-import {eventDispatcher, GameEvent} from "./eventDispatcher";
+import {eventDispatcher, GameEvent} from "./util/eventDispatcher";
 import './mainLoop'
 import './scene'
 
