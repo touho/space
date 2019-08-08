@@ -30,10 +30,6 @@ export default class Player extends Actor {
             this.angle += dt * TURN_SPEED
         }
 
-        console.log('dt', dt)
-        console.log('speed', this.speed)
-        console.log('pos', this.position)
-
         this.position.add(this.speed.clone().multiplyScalar(dt))
 
         // break in the air
