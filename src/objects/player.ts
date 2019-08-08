@@ -2,8 +2,8 @@ import Actor from "./actor";
 import {keyPressed, key} from "../util/input";
 import Vector from "../util/Vector";
 
-const TURN_SPEED = 1.4
-const ACCELERATION = 100
+const TURN_SPEED = 0.8
+const ACCELERATION = 50
 const MAX_SPEED = 100
 
 export default class Player extends Actor {
