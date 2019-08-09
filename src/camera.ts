@@ -8,6 +8,12 @@ export let cameraZoomTarget = 1
 
 let visibilityArray: Array<boolean> = []
 
+export function getStarZoom() {
+    // return (cameraZoom + 1) / 2
+    // return cameraZoom * 0.7
+    return (cameraZoom * 0.8 + 1) / 2
+}
+
 export function setCameraZoomTarget(targetZoom) {
     cameraZoomTarget = targetZoom
 }
@@ -28,17 +34,28 @@ export function getCameraBounds() {
     }
 }
 
-export function getCameraVisibilities(gameObjects: Array<GameObject>) {
+export function getStarCameraBounds() {
+    let starZoom = getStarZoom()
+    return {
+        left: camera.x - canvas.width * 0.5 / starZoom,
+        right: camera.x + canvas.width * 0.5 / starZoom,
+        top: camera.y - canvas.height * 0.5 / starZoom,
+        bottom: camera.y + canvas.height * 0.5 / starZoom,
+    }
+}
+
+export function getCameraVisibilities(gameObjects: Array<GameObject>, forStars: boolean = false) {
     const {
         left, right, top, bottom
-    } = getCameraBounds()
+    } = forStars ? getStarCameraBounds() : getCameraBounds()
 
     const objectCount = gameObjects.length
 
     visibilityArray.length = objectCount
 
     for (let i = 0; i < objectCount; i++) {
-        const { position, maximumRadius } = gameObjects[i]
+        let { position, maximumRadius } = gameObjects[i]
+
         visibilityArray[i] =
             position.x + maximumRadius >= left
             && position.x - maximumRadius <= right

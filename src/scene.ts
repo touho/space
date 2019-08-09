@@ -4,23 +4,26 @@ import {listenKeyDown, key} from "./util/input";
 import Player from "./objects/player";
 import Star from "./objects/star";
 import Vector from "./util/Vector";
-import {camera, cameraZoom, updateCamera, getCameraVisibilities, cameraZoomTarget, setCameraZoomTarget} from "./camera";
+import {
+    camera,
+    cameraZoom,
+    updateCamera,
+    getCameraVisibilities,
+    cameraZoomTarget,
+    setCameraZoomTarget,
+    getStarZoom
+} from "./camera";
 import Planet from "./objects/planet";
+import {Level} from "./gameContext";
 
 let scenes: Array<Scene> = []
-
-enum Level {
-    PLANET,
-    SOLAR_SYSTEM,
-    GALAXY,
-    UNIVERSE
-}
 
 let player: Player = null
 let planet: Planet = null
 
 class Scene {
     gameObjects: Array<GameObject> = []
+    stars: Array<GameObject> = []
 
     // Radius of this scene. You start to move to outer scale at innerRadius and at outerRadius this scene can be removed
     innerRadius: number = 1000
@@ -28,22 +31,101 @@ class Scene {
 
     constructor(private level: Level) {
         for (let i = 0; i < 10000; i++) {
-            this.gameObjects.push(new Star())
+            this.stars.push(new Star(level))
         }
-        this.gameObjects.push(planet = new Planet())
-        this.gameObjects.push(player = new Player())
+        if (level === Level.PLANET) {
+            this.gameObjects.push(planet = new Planet(level))
+            this.gameObjects.push(player = new Player(level))
+            player.position.setScalars(planet.radius + 22, 0)
+        } else if (level === Level.SOLAR_SYSTEM) {
+            this.gameObjects.push(planet = new Planet(level))
+            planet.setSun()
+
+            for (let i = 0; i < 10; i++) {
+                this.gameObjects.push(new Planet(level))
+            }
+
+            this.gameObjects.push(player = new Player(level))
+            player.position.x += 1000
+
+            this.innerRadius = 3000
+            this.outerRadius = 4000
+        }
+    }
+
+    getDistanceToClosest() {
+        if (this.level === Level.PLANET) {
+            return player.position.distance(planet.position) - planet.radius * 0.7
+        } else if (this.level === Level.SOLAR_SYSTEM) {
+            let distance = 999999
+            for (const go of this.gameObjects) {
+                if (go instanceof Planet) {
+                    let planet = go as Planet
+                    let distanceSuggestion = player.position.distance(planet.position) - planet.radius * 0.7
+                    if (distanceSuggestion < distance) {
+                        distance = distanceSuggestion
+                    }
+                }
+            }
+            return distance
+        }
+    }
+
+    updateZoom() {
+        let playerPlanetDist = this.getDistanceToClosest()
+        if (this.level === Level.PLANET) {
+            if (playerPlanetDist < 0) {
+                setCameraZoomTarget(1)
+            } else {
+                let targetZoom = Math.max(0.5, Math.min(1, (1 / playerPlanetDist * 200 + 1) / 2))
+                setCameraZoomTarget(targetZoom)
+            }
+        } else if (this.level === Level.SOLAR_SYSTEM) {
+            if (playerPlanetDist < 0) {
+                setCameraZoomTarget(1)
+            } else {
+                let targetZoom = Math.max(0.1, Math.min(1.5, (1 / playerPlanetDist * 350 + 0.3) / 2))
+                setCameraZoomTarget(targetZoom)
+            }
+        }
     }
 
     update(dt: number, time: number) {
         for (const go of this.gameObjects) {
             go.update(dt, time)
         }
+
+        if (this.level === Level.SOLAR_SYSTEM) {
+            for (const go of this.gameObjects) {
+                if (go instanceof Planet) {
+                    let planet = go as Planet
+
+                    let distance = planet.position.clone().subtract(player.position)
+                    let gravity = distance.setLength(10000 / distance.length() / distance.length())
+                    gravity.multiplyScalar(planet.radius)
+
+                    gravity.setLength(Math.min(gravity.length(), 25))
+
+                    player.speed.add(gravity.multiplyScalar(dt))
+                }
+            }
+        }
+    }
+
+    drawStars(context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+        const visibilities = getCameraVisibilities(this.stars, true)
+        const starCount = this.stars.length
+
+        for (let i = 0; i < starCount; i++) {
+            if (visibilities[i]) {
+                this.stars[i].draw(context)
+            }
+        }
     }
 
     draw(context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
         const visibilities = getCameraVisibilities(this.gameObjects)
-        const objectCount = this.gameObjects.length
-        for (let i = 0; i < objectCount; i++) {
+        for (let i = 0; i < this.gameObjects.length; i++) {
             if (visibilities[i]) {
                 this.gameObjects[i].draw(context)
             }
@@ -80,25 +162,23 @@ function update(dt: number) {
 
     if (scenes.length === 0) {
         scenes.push(new Scene(Level.PLANET))
+    } else if (player.position.length() >= scenes[0].outerRadius) {
+        let playerPos = player.position.multiplyScalar(0.6)
+        scenes.length = 0
+        scenes.push(new Scene(Level.SOLAR_SYSTEM))
+        player.position.set(playerPos)
     }
 
     time += dt
 
     for (const scene of scenes) {
         scene.update(dt, time)
-    }
-
-    let playerPlanetDist = player.position.distance(planet.position) - planet.radius * 0.7
-    if (playerPlanetDist < 0) {
-        setCameraZoomTarget(1)
-    } else {
-        let targetZoom = Math.max(  0.5, Math.min(1, (1 / playerPlanetDist * 200 + 1) / 2))
-        setCameraZoomTarget(targetZoom)
+        scene.updateZoom()
     }
 
     let cameraTarget = player.position.clone()
-    cameraTarget.add((new Vector(50, 0).rotateTo(player.angle)))
-    cameraTarget.add(player.speed.clone().multiplyScalar(1.5))
+    // cameraTarget.add((new Vector(50, 0).rotateTo(player.angle)))
+    // cameraTarget.add(player.speed.clone().multiplyScalar(1.5))
 
     updateCamera(dt, cameraTarget)
 }
@@ -106,13 +186,26 @@ function update(dt: number) {
 function draw(context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
     context.clearRect(0, 0, canvas.width, canvas.height)
 
+
+    // Draw stars
+
+    context.save()
+    context.translate(canvas.width / 2, canvas.height / 2)
+    let starZoom = getStarZoom()
+    context.scale(starZoom, starZoom)
+    context.translate((-camera.x ) / 1, (-camera.y) / 1)
+    for (const scene of scenes) {
+        scene.drawStars(context, canvas)
+    }
+    context.restore()
+
+
+    // Draw others
+
     context.save()
 
     context.translate(canvas.width / 2, canvas.height / 2)
     context.scale(cameraZoom, cameraZoom)
-    // context.translate(-canvas.width / 2 / cameraZoom, -canvas.height / 2 / cameraZoom)
-
-    // context.translate((-camera.x + canvas.width / 2 / cameraZoom) / 1, (-camera.y + canvas.height / 2 / cameraZoom) / 1)
     context.translate((-camera.x ) / 1, (-camera.y) / 1)
 
     for (const scene of scenes) {
