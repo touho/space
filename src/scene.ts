@@ -124,13 +124,6 @@ class Scene {
     }
 
     draw(context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
-        const visibilities = getCameraVisibilities(this.gameObjects)
-        for (let i = 0; i < this.gameObjects.length; i++) {
-            if (visibilities[i]) {
-                this.gameObjects[i].draw(context)
-            }
-        }
-
         context.strokeStyle = 'blue'
         context.lineWidth = 1
 
@@ -143,6 +136,13 @@ class Scene {
         context.beginPath()
         context.arc(0, 0, this.outerRadius, 0, Math.PI * 2, false)
         context.stroke()
+
+        const visibilities = getCameraVisibilities(this.gameObjects)
+        for (let i = 0; i < this.gameObjects.length; i++) {
+            if (visibilities[i]) {
+                this.gameObjects[i].draw(context)
+            }
+        }
     }
 }
 
