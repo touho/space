@@ -16,6 +16,14 @@ import {
 import Planet from "./objects/planet";
 import {Level} from "./gameContext";
 
+export let canvas : HTMLCanvasElement;
+let context : CanvasRenderingContext2D;
+
+eventDispatcher.listen(GameEvent.LOADED, function () {
+    canvas = document.getElementById('canvas') as HTMLCanvasElement
+    context = canvas.getContext('2d')
+}, 0)
+
 let scenes: Array<Scene> = []
 
 let player: Player = null
@@ -181,9 +189,11 @@ function update(dt: number) {
     // cameraTarget.add(player.speed.clone().multiplyScalar(1.5))
 
     updateCamera(dt, cameraTarget)
+
+    draw()
 }
 
-function draw(context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+function draw() {
     context.clearRect(0, 0, canvas.width, canvas.height)
 
 
@@ -223,4 +233,3 @@ function draw(context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
 }
 
 eventDispatcher.listen(GameEvent.UPDATE, update, -1000)
-eventDispatcher.listen(GameEvent.DRAW, draw)

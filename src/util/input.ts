@@ -1,3 +1,32 @@
+document.addEventListener("scroll", event => event.preventDefault(), {passive: false});
+
+export function upInputted() {
+    function touchesUp(touch: Touch) {
+        const w = window.innerWidth, h = window.innerHeight
+        const ratio = w/h
+        return touch.clientY < touch.clientX / ratio && touch.clientY < -touch.clientX / ratio + h
+    }
+    return keyPressed(key.up) || touches.find(touchesUp)
+}
+export function leftInputted() {
+    function touchesLeft(touch: Touch) {
+        const w = window.innerWidth, h = window.innerHeight
+        const ratio = w/h
+        return touch.clientY > touch.clientX / ratio && touch.clientY < -touch.clientX / ratio + h
+    }
+
+    return keyPressed(key.left) || touches.find(touchesLeft)
+}
+export function rightInputted() {
+    function touchesRight(touch: Touch) {
+        const w = window.innerWidth, h = window.innerHeight
+        const ratio = w/h
+        return touch.clientY < touch.clientX / ratio && touch.clientY > -touch.clientX / ratio + h
+    }
+
+    return keyPressed(key.right) || touches.find(touchesRight)
+}
+
 export function keyPressed(key) {
     return keys[key] || false;
 }
@@ -104,3 +133,29 @@ export function simulateKeyEvent(eventName: 'keydown' | 'keyup', keyCode: number
         } as any);
     }
 }
+
+let touches: Array<Touch> = []
+
+document.addEventListener('touchstart', function(event) {
+    event.preventDefault();
+    touches.length = 0
+    for (let i = 0; i < event.touches.length; i++) {
+        touches.push(event.touches[i])
+    }
+}, { passive: false })
+
+document.addEventListener('touchmove', function(event) {
+    event.preventDefault();
+    touches.length = 0
+    for (let i = 0; i < event.touches.length; i++) {
+        touches.push(event.touches[i])
+    }
+})
+
+document.addEventListener('touchend', function(event) {
+    event.preventDefault();
+    touches.length = 0
+    for (let i = 0; i < event.touches.length; i++) {
+        touches.push(event.touches[i])
+    }
+})

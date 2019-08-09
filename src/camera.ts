@@ -1,6 +1,6 @@
 import Vector from "./util/Vector";
-import {canvas} from "./mainLoop";
 import GameObject from "./objects/gameObject";
+import {canvas} from "./scene";
 
 export let camera: Vector = new Vector(0, 0)
 export let cameraZoom: number = 0.3

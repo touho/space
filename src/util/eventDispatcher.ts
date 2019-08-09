@@ -1,7 +1,6 @@
 export enum GameEvent {
     LOADED = 'LOADED',
-    UPDATE = 'UPDATE',
-    DRAW = 'DRAW',
+    UPDATE = 'UPDATE'
 }
 
 export type ListenerFunction = Function & { priority?: number };

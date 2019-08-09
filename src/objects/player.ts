@@ -1,5 +1,5 @@
 import Actor from "./actor";
-import {key, keyPressed} from "../util/input";
+import {key, keyPressed, leftInputted, rightInputted, upInputted} from "../util/input";
 import Vector from "../util/Vector";
 import {Level} from "../gameContext";
 
@@ -16,16 +16,16 @@ export default class Player extends Actor {
         super(level)
     }
     update(dt: number, time: number) {
-        if (keyPressed(key.up)) {
+        if (upInputted()) {
             this.speed.addScalars(Math.sin(this.angle) * dt * ACCELERATION, -Math.cos(this.angle) * dt * ACCELERATION)
             if (this.speed.length() > MAX_SPEED) {
                 this.speed.setLength(MAX_SPEED)
             }
         }
-        if (keyPressed(key.left)) {
+        if (leftInputted()) {
             this.angle -= dt * TURN_SPEED
         }
-        if (keyPressed(key.right)) {
+        if (rightInputted()) {
             this.angle += dt * TURN_SPEED
         }
 

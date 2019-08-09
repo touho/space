@@ -1,1 +1,2 @@
+rm dist/*
 ./node_modules/.bin/parcel build src/index.html --public-url ./
