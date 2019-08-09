@@ -4,7 +4,8 @@ import {listenKeyDown, key} from "./util/input";
 import Player from "./objects/player";
 import Star from "./objects/star";
 import Vector from "./util/Vector";
-import {camera, cameraZoom, updateCamera, getCameraVisibilities} from "./camera";
+import {camera, cameraZoom, updateCamera, getCameraVisibilities, cameraZoomTarget, setCameraZoomTarget} from "./camera";
+import Planet from "./objects/planet";
 
 let scenes: Array<Scene> = []
 
@@ -16,13 +17,20 @@ enum Level {
 }
 
 let player: Player = null
+let planet: Planet = null
 
 class Scene {
     gameObjects: Array<GameObject> = []
+
+    // Radius of this scene. You start to move to outer scale at innerRadius and at outerRadius this scene can be removed
+    innerRadius: number = 1000
+    outerRadius: number = 2000
+
     constructor(private level: Level) {
         for (let i = 0; i < 10000; i++) {
             this.gameObjects.push(new Star())
         }
+        this.gameObjects.push(planet = new Planet())
         this.gameObjects.push(player = new Player())
     }
 
@@ -40,6 +48,19 @@ class Scene {
                 this.gameObjects[i].draw(context)
             }
         }
+
+        context.strokeStyle = 'blue'
+        context.lineWidth = 1
+
+        context.beginPath()
+        context.arc(0, 0, this.innerRadius, 0, Math.PI * 2, false)
+        context.stroke()
+
+        context.strokeStyle = 'purple'
+
+        context.beginPath()
+        context.arc(0, 0, this.outerRadius, 0, Math.PI * 2, false)
+        context.stroke()
     }
 }
 
@@ -65,6 +86,14 @@ function update(dt: number) {
 
     for (const scene of scenes) {
         scene.update(dt, time)
+    }
+
+    let playerPlanetDist = player.position.distance(planet.position) - planet.radius * 0.7
+    if (playerPlanetDist < 0) {
+        setCameraZoomTarget(1)
+    } else {
+        let targetZoom = Math.max(  0.5, Math.min(1, (1 / playerPlanetDist * 200 + 1) / 2))
+        setCameraZoomTarget(targetZoom)
     }
 
     let cameraTarget = player.position.clone()

@@ -8,6 +8,10 @@ export let cameraZoomTarget = 1
 
 let visibilityArray: Array<boolean> = []
 
+export function setCameraZoomTarget(targetZoom) {
+    cameraZoomTarget = targetZoom
+}
+
 export function updateCamera(dt: number, target: Vector) {
     let cameraDelta = target.subtract(camera).multiplyScalar(1 * dt)
     camera.add(cameraDelta)
