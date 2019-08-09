@@ -1,1 +1,11 @@
+#!/bin/bash
+
+cd $(dirname "$0")
+export PATH=$PATH:./node_modules/.bin
+
+if ! command -v parcel > /dev/null
+then
+	yarn
+fi
+
 ./node_modules/.bin/parcel src/index.html
