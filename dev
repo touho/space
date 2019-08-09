@@ -8,4 +8,4 @@ then
 	yarn
 fi
 
-./node_modules/.bin/parcel src/index.html
+parcel src/index.html
