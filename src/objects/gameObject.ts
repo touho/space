@@ -2,6 +2,8 @@ import Vector from "../util/Vector";
 
 export default class GameObject {
     position: Vector = new Vector(0, 0)
+    maximumRadius: number = 100 // for visual optimization
+    isInCamera: boolean = false // for visual optimization
     constructor() {
     }
     update(dt: number, time: number) {

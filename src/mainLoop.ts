@@ -1,7 +1,6 @@
 import {eventDispatcher, GameEvent} from "./util/eventDispatcher";
-import './mainLoop'
 
-let canvas : HTMLCanvasElement;
+export let canvas : HTMLCanvasElement;
 let context : CanvasRenderingContext2D;
 
 function updateCanvasSize() {
