@@ -1,6 +1,7 @@
 import GameObject from "./gameObject";
 import {Level} from "../gameContext";
 import Vector from "../util/Vector";
+import {time} from "../scene";
 
 export default class Planet extends GameObject {
     radius: number = 200 + Math.random() * 600
@@ -8,6 +9,9 @@ export default class Planet extends GameObject {
     distanceFromCenter: number = 0
     angleOffset: number = 0
     angleSpeed: number = 0
+
+    innerLevelRadius = 200
+    outerLevelRadius = 400
     constructor(level: Level) {
         super(level)
 
@@ -19,6 +23,8 @@ export default class Planet extends GameObject {
 
             this.angleOffset = Math.random() * Math.PI * 2
             this.angleSpeed = 60000 / Math.pow(this.distanceFromCenter, 2) //  0.01 + Math.random() * 0.02
+
+            this.update(0, time)
         }
 
         this.maximumRadius = this.radius
@@ -57,13 +63,13 @@ export default class Planet extends GameObject {
             context.lineWidth = 1
 
             context.beginPath()
-            context.arc(this.position.x, this.position.y, 200, 0, Math.PI * 2, false)
+            context.arc(this.position.x, this.position.y, this.innerLevelRadius, 0, Math.PI * 2, false)
             context.stroke()
 
             context.strokeStyle = 'purple'
 
             context.beginPath()
-            context.arc(this.position.x, this.position.y, 300, 0, Math.PI * 2, false)
+            context.arc(this.position.x, this.position.y, this.outerLevelRadius, 0, Math.PI * 2, false)
             context.stroke()
         }
     }

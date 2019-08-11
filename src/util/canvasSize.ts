@@ -5,16 +5,13 @@ let canvas: HTMLCanvasElement = null
 let previousWidth = 0, previousHeight = 0
 
 function setSize(force: boolean = false) {
-    console.log('resize')
     if (!canvas) return
-    console.log('resize')
     let width = window.innerWidth
     let height = window.innerHeight
 
     if (width === previousWidth && height === previousHeight)
         return
 
-    console.log('resize')
 
     canvas.style.width = width + 'px';
     canvas.style.height = height + 'px';
